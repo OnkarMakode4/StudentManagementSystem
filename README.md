@@ -86,10 +86,12 @@ A full-featured School Management Web Application built with **Spring Boot**, **
 - Maven
 
 ### Screen Shoot
-Admin Page
+### Admin Page
+
 <img width="1917" height="972" alt="Admin Page" src="https://github.com/user-attachments/assets/04f2c139-0654-47d0-b3ed-f585697e84a0" />
 
 ### User Page
+
 <img width="1912" height="972" alt="User Page" src="https://github.com/user-attachments/assets/7993ff1b-9a4c-4ed4-9859-4065a2b319ef" />
 
 
