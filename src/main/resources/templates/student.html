@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8">
+<title>Student Management System</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css">
+<style>
+    body { background-color: #f5f5f5; }
+
+    /* Centered column headers */
+    .table thead th {
+        text-align: center;
+        vertical-align: middle;
+        background-color: #343a40;
+        color: white;
+        font-size: 13px;
+        padding: 12px 8px;
+    }
+
+    /* Centered table cells */
+    .table tbody td {
+        text-align: center;
+        vertical-align: middle;
+        padding: 10px 8px;
+    }
+
+    /* Left align email and courses */
+    .table tbody td.text-left {
+        text-align: left;
+    }
+
+    /* Action buttons spacing */
+    .action-btn {
+        margin: 2px;
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+
+    /* Student photo */
+    .student-photo {
+        width: 45px;
+        height: 45px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #007bff;
+    }
+
+    @media print {
+        nav, .no-print, .pagination, form { display: none !important; }
+        body { background: white; }
+        .table { font-size: 11px; }
+        .table thead th { background-color: #343a40 !important; color: white !important; }
+    }
+</style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-md bg-dark navbar-dark px-3">
+    <a class="navbar-brand" href="#">Student Management System</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav align-items-center ml-auto">
+
+            <li class="nav-item mr-2">
+                <a class="btn btn-primary btn-sm" th:href="@{/dashboard}">Dashboard</a>
+            </li>
+
+            <li class="nav-item mr-2">
+                <a class="btn btn-info btn-sm" th:href="@{/announcements}">📢 Announcements</a>
+            </li>
+
+            <li class="nav-item mr-2">
+                <a class="btn btn-success btn-sm" th:href="@{/timetable}">📅 Timetable</a>
+            </li>
+
+            <li class="nav-item mr-2" sec:authorize="hasRole('ADMIN')">
+                <a class="btn btn-warning btn-sm" th:href="@{/courses}">Manage Courses</a>
+            </li>
+
+            <li class="nav-item mr-2" sec:authorize="hasRole('ADMIN')">
+                <a class="btn btn-secondary btn-sm" th:href="@{/fees}">Fee Overview</a>
+            </li>
+
+            <li class="nav-item mr-2">
+                <a class="btn btn-light btn-sm" th:href="@{/profile}">My Profile</a>
+            </li>
+
+            <li class="nav-item mr-2">
+                <a class="btn btn-danger btn-sm" th:href="@{/logout}">Logout</a>
+            </li>
+
+            <li class="nav-item">
+                <form class="form-inline" th:action="@{/students}" method="get">
+                    <input class="form-control form-control-sm mr-1"
+                           type="search"
+                           name="keyword"
+                           placeholder="Search student..."
+                           th:value="${keyword}"
+                           style="width:160px;">
+                    <button class="btn btn-warning btn-sm" type="submit">Search</button>
+                </form>
+            </li>
+
+        </ul>
+    </div>
+</nav>
+
+<div class="container-fluid mt-3 px-4">
+
+    <h3 class="text-center mb-3">Student List</h3>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible">
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+
+    <!-- Action buttons row -->
+    <div class="mb-3 no-print">
+        <span sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/students/new}" class="btn btn-primary btn-sm mr-1">
+                ➕ Add Student
+            </a>
+            <a th:href="@{/students/export/csv}" class="btn btn-success btn-sm mr-1">
+                📥 Export CSV
+            </a>
+            <a th:href="@{/attendance}" class="btn btn-info btn-sm mr-1">
+                ✅ Mark Attendance
+            </a>
+        </span>
+        <button onclick="window.print()" class="btn btn-secondary btn-sm">
+            🖨 Print List
+        </button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover">
+
+            <thead>
+                <tr>
+                    <th style="width:70px;">Photo</th>
+                    <th style="width:110px;">First Name</th>
+                    <th style="width:110px;">Last Name</th>
+                    <th style="width:180px;">Email</th>
+                    <th style="width:80px;">Gender</th>
+                    <th style="width:140px;">Courses</th>
+                    <th sec:authorize="hasRole('ADMIN')" style="width:320px;">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr th:each="student : ${students}">
+
+                    <!-- Photo -->
+                    <td>
+                        <img th:if="${student.photoPath}"
+                             th:src="@{'/uploads/photos/' + ${student.photoPath}}"
+                             class="student-photo">
+                        <span th:unless="${student.photoPath}"
+                              style="font-size:24px; color:#aaa;">👤</span>
+                    </td>
+
+                    <!-- First Name — clickable -->
+                    <td>
+                        <a th:href="@{/students/view/{id}(id=${student.id})}"
+                           th:text="${student.firstName}"
+                           style="color:#007bff; text-decoration:none; font-weight:500;">
+                        </a>
+                    </td>
+
+                    <!-- Last Name — clickable -->
+                    <td>
+                        <a th:href="@{/students/view/{id}(id=${student.id})}"
+                           th:text="${student.lastName}"
+                           style="color:#007bff; text-decoration:none; font-weight:500;">
+                        </a>
+                    </td>
+
+                    <!-- Email -->
+                    <td class="text-left" th:text="${student.email}"></td>
+
+                    <!-- Gender -->
+                    <td th:text="${student.gender}"></td>
+
+                    <!-- Courses -->
+                    <td class="text-left">
+                        <span th:each="course, iter : ${student.courses}">
+                            <span class="badge badge-primary"
+                                  th:text="${course.courseName}"></span>
+                        </span>
+                        <span th:if="${#sets.isEmpty(student.courses)}"
+                              class="text-muted" style="font-size:12px;">None</span>
+                    </td>
+
+                    <!-- Action buttons -->
+                    <td sec:authorize="hasRole('ADMIN')">
+                        <a th:href="@{/students/edit/{id}(id=${student.id})}"
+                           class="btn btn-info action-btn">Update</a>
+
+                        <a th:href="@{/students/{id}(id=${student.id})}"
+                           class="btn btn-danger action-btn"
+                           onclick="return confirm('Are you sure you want to delete this student?')">Delete</a>
+
+                        <a th:href="@{/attendance/student/{id}(id=${student.id})}"
+                           class="btn btn-secondary action-btn">Attendance</a>
+
+                        <a th:href="@{/grades/student/{id}(id=${student.id})}"
+                           class="btn btn-warning action-btn">Grades</a>
+
+                        <a th:href="@{/students/idcard/{id}(id=${student.id})}"
+                           class="btn btn-dark action-btn">ID Card</a>
+
+                        <a th:href="@{/fees/student/{id}(id=${student.id})}"
+                           class="btn btn-success action-btn">Fees</a>
+                    </td>
+
+                </tr>
+            </tbody>
+
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <nav th:if="${totalPages > 1}" class="no-print">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/students(page=${currentPage - 1}, keyword=${keyword})}">
+                   &laquo; Previous
+                </a>
+            </li>
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                th:classappend="${i == currentPage} ? 'active'">
+                <a class="page-link"
+                   th:href="@{/students(page=${i}, keyword=${keyword})}"
+                   th:text="${i + 1}"></a>
+            </li>
+            <li class="page-item"
+                th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/students(page=${currentPage + 1}, keyword=${keyword})}">
+                   Next &raquo;
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.querySelector('input[name="keyword"]');
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            if (this.value.trim() === "") {
+                window.location.href = "/students";
+            }
+        });
+    }
+});
+</script>
+
+</body>
+</html>

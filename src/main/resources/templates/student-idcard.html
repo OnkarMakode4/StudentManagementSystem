@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Student ID Card</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css">
+<style>
+    body { background-color: #f0f0f0; }
+
+    .id-card {
+        width: 380px;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        margin: 40px auto;
+        background: white;
+    }
+
+    .id-card-header {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .id-card-header h5 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+
+    .id-card-header small {
+        font-size: 12px;
+        opacity: 0.8;
+    }
+
+    .id-card-body {
+        padding: 20px;
+        text-align: center;
+    }
+
+    .id-photo {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #007bff;
+        margin-bottom: 12px;
+    }
+
+    .id-placeholder {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        background: #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 42px;
+        color: #6c757d;
+        border: 4px solid #007bff;
+        margin: 0 auto 12px auto;
+    }
+
+    .id-name {
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 4px;
+    }
+
+    .id-details {
+        font-size: 13px;
+        color: #555;
+        margin-bottom: 4px;
+    }
+
+    .id-courses {
+        margin-top: 10px;
+        font-size: 12px;
+    }
+
+    .id-card-footer {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        text-align: center;
+        padding: 10px;
+        font-size: 12px;
+        letter-spacing: 1px;
+    }
+
+    .id-badge {
+        display: inline-block;
+        background: #e9f0fb;
+        color: #0056b3;
+        border-radius: 12px;
+        padding: 2px 10px;
+        margin: 2px;
+        font-size: 12px;
+    }
+
+    @media print {
+        nav, .no-print { display: none !important; }
+        body { background: white; }
+        .id-card { box-shadow: none; margin: 10px auto; }
+    }
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-md bg-dark navbar-dark px-4 no-print">
+    <a class="navbar-brand" href="#">Student Management System</a>
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="btn btn-primary btn-sm" th:href="@{/students}">Back to Students</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="text-center mt-3 no-print">
+    <button onclick="window.print()" class="btn btn-success">🖨 Print ID Card</button>
+</div>
+
+<!-- ID CARD -->
+<div class="id-card">
+
+    <div class="id-card-header">
+        <h5>🎓 STUDENT ID CARD</h5>
+        <small>Student Management System</small>
+    </div>
+
+    <div class="id-card-body">
+
+        <!-- Photo -->
+        <img th:if="${student.photoPath}"
+             th:src="@{'/uploads/photos/' + ${student.photoPath}}"
+             class="id-photo">
+        <div th:unless="${student.photoPath}" class="id-placeholder">
+            <span th:text="${#strings.substring(student.firstName, 0, 1)}"></span>
+        </div>
+
+        <!-- Name -->
+        <div class="id-name" th:text="${student.firstName + ' ' + student.lastName}"></div>
+
+        <!-- Details -->
+        <div class="id-details">
+            <span>📧 </span><span th:text="${student.email}"></span>
+        </div>
+        <div class="id-details" th:if="${student.gender}">
+            <span>👤 </span><span th:text="${student.gender}"></span>
+        </div>
+
+        <!-- ID Number -->
+        <div class="id-details mt-1">
+            <strong>ID: </strong>
+            <span th:text="'STU-' + ${student.id}"></span>
+        </div>
+
+        <!-- Courses -->
+        <div class="id-courses" th:if="${not #sets.isEmpty(student.courses)}">
+            <strong>Enrolled Courses:</strong><br>
+            <span th:each="course : ${student.courses}" class="id-badge"
+                  th:text="${course.courseName}"></span>
+        </div>
+        <div class="id-courses text-muted" th:if="${#sets.isEmpty(student.courses)}">
+            No courses assigned
+        </div>
+
+    </div>
+
+    <div class="id-card-footer">
+        STUDENT MANAGEMENT SYSTEM
+    </div>
+
+</div>
+
+</body>
+</html>
